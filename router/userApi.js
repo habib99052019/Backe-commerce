@@ -5,12 +5,49 @@ const userSchema = require('../models/user.js')
 
 const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
-async function func(){
-    var user = await userSchema.find()
-    console.log(user)
+// async function func(){
+//     var user = await userSchema.find()
+//     console.log(user)
 
-}
-func()
+// }
+// func()
+router.post('/', async (req, res) => {
+   
+   
+    try {
+        var user = await userSchema .findOne({ login: req.body.login })
+
+         
+        if (user) {
+            console.log(admin,12);
+           const  test = await bcrypt.compare(req.body.password, user.password)
+                console.log(test ,5)
+            if (test) {
+                var token = jwt.sign({ _id: user._id }, 'privateKey', { expiresIn: '1d' })
+
+                // console.log(admin);
+                // res.send({token: token})  pour envoyer comme objet  json 
+                res.header('Authorization', token).send({ 
+                    message: true , 
+                    user: user._id,
+                   // role:admin.role,
+                      token: token })
+            }
+            else { //res.status(201).send("mots de passe incorrect")
+                return res.send({ message: false })
+            }
+
+        }
+        else {
+            return /*res.status(401).send("email ou mots ded passe incorrect").*/res.send({ message: false })
+        }
+
+    } catch (error) {
+        res.send(error.message)
+    }
+
+});
+
 console.log("declarer super user")
 router.get('/', async (req, res) => {
   
